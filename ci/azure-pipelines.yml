@@ -9,14 +9,6 @@ variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
 
 jobs:
-  - job: Check
-    steps:
-      - template: templates/install.yml
-        parameters:
-          pythonVersion: "3.7"
-      - script: scripts/check
-        displayName: "Run checks"
-
   - job: Test
     strategy:
       matrix:
@@ -29,6 +21,8 @@ jobs:
       - template: templates/install.yml
         parameters:
           pythonVersion: $(pythonVersion)
+      - script: scripts/check
+        displayName: "Run checks"
       - script: scripts/test
         displayName: "Run tests"
       - script: |
