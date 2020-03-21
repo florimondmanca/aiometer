@@ -1,52 +1,55 @@
 from contextlib import asynccontextmanager
 from typing import (
-    Any,
     AsyncContextManager,
     AsyncIterable,
     AsyncIterator,
     Awaitable,
     Callable,
-    NamedTuple,
-    Optional,
+    Literal,
     Sequence,
-    TypeVar,
+    Tuple,
+    overload,
 )
 
 import anyio
 
-from ._concurrency import MemorySendChannel, open_memory_channel
-
-T = TypeVar("T")
-
-
-class Config(NamedTuple):
-    send_to: Optional[MemorySendChannel]
+from .._concurrency import open_memory_channel
+from ._run_each import run_each
+from ._types import T, U
 
 
-async def _worker(
-    async_fn: Callable[..., Awaitable], value: Any, config: Config
-) -> None:
-    result = await async_fn(value)
-    if config.send_to is not None:
-        await config.send_to.send(result)
+@overload
+def amap(
+    async_fn: Callable[[U], Awaitable[T]], args: Sequence[U],
+) -> AsyncContextManager[AsyncIterable[Tuple[T]]]:
+    ...  # pragma: no cover
 
 
-async def run_each(
-    async_fn: Callable[..., Awaitable],
-    args: Sequence,
-    _send_to: MemorySendChannel = None,
-) -> None:
-    config = Config(send_to=_send_to)
-    async with anyio.create_task_group() as task_group:
-        for value in args:
-            await task_group.spawn(_worker, async_fn, value, config)
+@overload
+def amap(
+    async_fn: Callable[[U], Awaitable[T]],
+    args: Sequence[U],
+    _include_index: Literal[False],
+) -> AsyncContextManager[AsyncIterable[Tuple[T]]]:
+    ...  # pragma: no cover
+
+
+@overload
+def amap(
+    async_fn: Callable[[U], Awaitable[T]],
+    args: Sequence[U],
+    _include_index: Literal[True],
+) -> AsyncContextManager[AsyncIterable[Tuple[int, T]]]:
+    ...  # pragma: no cover
 
 
 # Wrap decorator usage so we can properly type this as returning an async context
 # manager. (The `AsyncIterator` annotation is correct here, but confusing to type
 # checkers on the client side.)
 def amap(
-    async_fn: Callable[..., Awaitable[T]], args: Sequence
+    async_fn: Callable[[U], Awaitable[T]],
+    args: Sequence[U],
+    _include_index: bool = False,
 ) -> AsyncContextManager[AsyncIterable[T]]:
     @asynccontextmanager
     async def _amap() -> AsyncIterator[AsyncIterable[T]]:
@@ -58,7 +61,12 @@ def amap(
             async with anyio.create_task_group() as task_group:
 
                 async def run_each_and_break() -> None:
-                    await run_each(async_fn, args=args, _send_to=send_channel)
+                    await run_each(
+                        async_fn,
+                        args=args,
+                        _include_index=_include_index,
+                        _send_to=send_channel,
+                    )
                     # Make any `async for _ in receive_channel: ...` terminate.
                     await send_channel.aclose()
 

@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 import aiometer
@@ -41,9 +43,9 @@ async def test_amap_ignore_results() -> None:
     items = ["apple", "banana", "cherry", "apple"]
 
     async with aiometer.amap(process, items):
-        # NOTE: will exit when all tasks have completed.
         pass
 
+    # Should have waited for all tasks to complete before exiting.
     assert called == 4
 
 
@@ -62,3 +64,15 @@ async def test_amap_task_exception() -> None:
         async with aiometer.amap(process, items) as results:
             async for result in results:
                 pass
+
+
+async def test_run_all() -> None:
+    async def process_fast() -> str:
+        return "fast"
+
+    async def process_slow() -> str:
+        await asyncio.sleep(0.1)
+        return "slow"
+
+    assert await aiometer.run_all([process_fast, process_slow]) == ["fast", "slow"]
+    assert await aiometer.run_all([process_slow, process_fast]) == ["slow", "fast"]
