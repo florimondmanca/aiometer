@@ -23,6 +23,8 @@ from ._types import T, U
 def amap(
     async_fn: Callable[[U], Awaitable[T]],
     args: Sequence[U],
+    *,
+    max_at_once: int = None,
     _include_index: Literal[False] = False,
 ) -> AsyncContextManager[AsyncIterable[T]]:
     ...  # pragma: no cover
@@ -32,6 +34,8 @@ def amap(
 def amap(
     async_fn: Callable[[U], Awaitable[T]],
     args: Sequence[U],
+    *,
+    max_at_once: int = None,
     _include_index: Literal[True],
 ) -> AsyncContextManager[AsyncIterable[Tuple[int, T]]]:
     ...  # pragma: no cover
@@ -41,7 +45,11 @@ def amap(
 # manager. (The `AsyncIterator` annotation is correct here, but confusing to type
 # checkers on the client side.)
 def amap(
-    async_fn: Callable[[U], Awaitable], args: Sequence[U], _include_index: bool = False,
+    async_fn: Callable[[U], Awaitable],
+    args: Sequence[U],
+    *,
+    max_at_once: int = None,
+    _include_index: bool = False,
 ) -> AsyncContextManager[AsyncIterable]:
     @asynccontextmanager
     async def _amap() -> AsyncIterator[AsyncIterable]:
@@ -55,7 +63,8 @@ def amap(
                 async def run_each_and_break() -> None:
                     await run_each(
                         async_fn,
-                        args=args,
+                        args,
+                        max_at_once=max_at_once,
                         _include_index=_include_index,
                         _send_to=send_channel,
                     )
@@ -63,7 +72,7 @@ def amap(
                     await send_channel.aclose()
 
                 await task_group.spawn(run_each_and_break)
+
                 yield receive_channel
-                task_group.cancel_scope.cancel()
 
     return _amap()
