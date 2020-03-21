@@ -32,9 +32,9 @@ jobs:
       - script: scripts/test
         displayName: "Run tests"
       - script: |
-          if [ -f .coverage ]; then
-          python -m pip install codecov;
-          codecov --required;
+          if [ $(pythonVersion) = '3.8' ] & [ -f .coverage ]; then
+            python -m pip install codecov;
+            codecov --required;
           fi
         env:
           CODECOV_TOKEN: $(codecovToken)
