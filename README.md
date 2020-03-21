@@ -4,26 +4,67 @@
 [![Coverage](https://codecov.io/gh/florimondmanca/aiometer/branch/master/graph/badge.svg)](https://codecov.io/gh/florimondmanca/aiometer)
 [![Package version](https://badge.fury.io/py/aiometer.svg)](https://pypi.org/project/aiometer)
 
-`aiometer` is a concurrency scheduling library for `asyncio`, inspired by [Trimeter](https://github.com/python-trio/trimeter). It makes it easier to execute lots of tasks concurrently while controlling concurrency limits (applying _backpressure_) and collecting results.
+`aiometer` is a concurrency scheduling library for `asyncio` and `trio`, inspired by [Trimeter](https://github.com/python-trio/trimeter). It makes it easier to execute lots of tasks concurrently while controlling concurrency limits (i.e. applying _[backpressure](https://lucumr.pocoo.org/2020/1/1/async-pressure/)_) and collecting results in a predictable manner.
 
 _This is a design document and a work in progress. Not even guaranteed to lead to a published alpha._
 
 **Content**
 
+- [Example](#example)
 - [Features](#features)
 - [Installation](#installation)
-- [Motivation](#motivation)
-- [Example](#example)
 - [Guide](#guide)
-  - [Running tasks](#running-tasks)
   - [Flow control](#flow-control)
+  - [Running tasks](#running-tasks)
 
-## Features
+## Example
 
-- Concurrency limits.
-- Throttling support (aka rate limiting).
-- Fully type annotated.
-- 100% test coverage.
+Let's use [HTTPX](https://github.com/encode/httpx) to make web requests concurrently...
+
+_Try this code interactively using [IPython](https://ipython.org/install.html)._
+
+```python
+>>> import asyncio
+>>> import functools
+>>> import random
+>>> import aiometer
+>>> import httpx
+>>>
+>>> client = httpx.AsyncClient()
+>>>
+>>> async def fetch(client, request):
+...     response = await client.send(request)
+...     # Simulate extra processing...
+...     await asyncio.sleep(2 * random.random())
+...     return response.json()["json"]
+...
+>>> requests = [
+...     httpx.Request("POST", "https://httpbin.org/anything", json={"index": index})
+...     for index in range(100)
+... ]
+...
+>>> # Send requests, and process responses as they're made available:
+>>> async with aiometer.amap(
+...     functools.partial(fetch, client),
+...     requests,
+...     max_at_once=10, # Limit maximum number of concurrently running tasks.
+...     max_per_second=5,  # Limit request rate to not overload the server.
+... ) as results:
+...     async for data in results:
+...         print(data)
+...
+{'index': 3}
+{'index': 4}
+{'index': 1}
+{'index': 2}
+{'index': 0}
+...
+>>> # Alternatively, fetch and aggregate responses into an (ordered) list...
+>>> jobs = [functools.partial(fetch, client, request) for request in requests]
+>>> results = await aiometer.run_all(jobs, max_at_once=10, max_per_second=5)
+>>> results
+[{'index': 0}, {'index': 1}, {'index': 2}, {'index': 3}, {'index': 4}, ...]
+```
 
 ## Installation
 
@@ -31,144 +72,126 @@ _This is a design document and a work in progress. Not even guaranteed to lead t
 pip install git+https://github.com/florimondmanca/aiometer.git@master
 ```
 
-## Motivation
+## Features
 
-Suppose you want to fetch and process a large amount of web pages. A first working approach would be fetching them in series:
-
-```python
-for url in urls:
-    await fetch_and_process(url)
-```
-
-But to make this program faster, you'd like to fetch these pages concurrently. So you reach out to `asyncio.gather()`:
-
-```python
-tasks = (fetch_and_process(url) for url in urls)
-await asyncio.gather(*tasks)
-```
-
-You soon realize you're now:
-
-- Overloading the network (`asyncio.gather()` spawns _all_ requests _at the same time_, resulting in lots of network connections and handshakes).
-- Overloading the server (e.g. you exceeded server rate limits and start seeing `429 Too Many Requests` error responses).
-
-So, you'd like to limit the number of requests at any given time, say 5, as well as throttle down to 1 request per second to comply with the server's rate limiting policy.
-
-You can achieve all of these with `aiometer`.
-
-## Example: concurrent web requests with throttling
-
-Using [HTTPX](https://github.com/encode/httpx):
-
-```python
-import asyncio
-from functools import partial
-
-import aiometer
-import httpx
-
-
-async def fetch_and_process(client, url, payload):
-    response = await client.post(url, json={"index": index})
-    return response.json()
-
-
-async def main():
-    payloads = [{"index": index} for _ in range(100)]
-    urls = ["https://httpbin.org/json" for _ in payloads]
-
-    async with httpx.AsyncClient() as client:
-        async with aiometer.amap(
-            partial(fetch_and_process, client=client),
-            urls,
-            payloads,
-            # Limit number of requests at any given time.
-            max_at_once=5,
-            # Limit number of requests per second.
-            max_per_second=1,
-        ) as results:
-            async for result in results:
-                print(result)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
+- Concurrency management and throttling helpers.
+- `asyncio` and `trio` support.
+- Fully type annotated.
+- 100% test coverage.
 
 ## Guide
 
-### Running tasks
-
-#### Running tasks concurrently
-
-Use `.run_each()`:
-
-```python
-await aiometer.run_each(fetch_and_process, urls)
-```
-
-Suitable for when tasks don't return a value, or you don't care about returned values.
-
-#### Collecting task results as they're made available
-
-Use `.amap()`:
-
-```python
-async with aiometer.amap(fetch_and_process, urls) as results:
-    async for result in results:
-        ...
-```
-
-`results` will be yielded in order of completion.
-
-_Similar to [`Promise.map()`](http://bluebirdjs.com/docs/api/promise.map.html)._
-
-#### Collecting results all at once
-
-Use `.run_all()`:
-
-```python
-results = await aiometer.run_all(
-  [functools.partial(fetch_and_process, url=url) for url in urls]
-)
-```
-
-Returned `results` will be in order of the async functions passed, regardless of completion order.
-
-_Similar to [`Promise.all()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all)._
-
-#### Collecting result of the first completed task
-
-Use `.run_any()`:
-
-```python
-results = await aiometer.run_all(
-  [functools.partial(fetch_and_process, url=url) for url in urls]
-)
-```
-
-_Similar to [`Promise.any()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/any)._
-
 ### Flow control
 
-#### Limiting concurrent tasks
+The key highlight of `aiometer` is allowing you to apply flow control strategies in order to limit the degree of concurrency of your programs.
 
-Use `max_at_once`:
+There are two knobs you can play with to fine-tune concurrency:
+
+- `max_at_once`: this is used to limit the maximum number of concurrently running tasks at any given time. (If you have 100 tasks and set `max_at_once=10`, then `aiometer` will ensure that no more than 10 run at the same time.)
+- `max_per_second`: this option limits the number of tasks spawned per second. This is useful to not overload I/O resources, such as servers that may have a rate limiting policy in place.
+
+Example usage:
 
 ```python
-await aiometer.run_each(
-    fetch_and_process, urls, max_at_once=5
-)
+>>> import asyncio
+>>> import aiometer
+>>> async def make_query(query):
+...     await asyncio.sleep(0.05)  # Simulate a database request.
+...
+>>> queries = ['SELECT * from authors'] * 1000
+>>> # Allow at most 5 queries to run concurrently at any given time:
+>>> await aiometer.run_on_each(make_query, queries, max_at_once=5)
+...
+>>> # Make at most 10 queries per second:
+>>> await aiometer.run_on_each(make_query, queries, max_per_second=10)
+...
+>>> # Run at most 10 concurrent jobs, spawning new ones at least every 5 seconds:
+>>> async def job(id):
+...     await asyncio.sleep(10)  # A very long task.
+...
+>>> await aiometer.run_on_each(job, range(100),  max_at_once=10, max_per_second=0.2)
 ```
 
-#### Throttling
+### Running tasks
 
-Use `max_per_second`:
+`aiometer` provides 4 different ways to run tasks concurrently in the form of 4 different run functions. Each function accepts all the options documented in [Flow control](#flow-control), and runs tasks in a slightly different way, allowing to address a variety of use cases. Here's a handy table for reference:
+
+| Entrypoint      | Use case                                       |
+| --------------- | ---------------------------------------------- |
+| `run_on_each()` | Execute async callbacks in any order.          |
+| `run_all()`     | Return results as an ordered list.             |
+| `amap()`        | Iterate over results as they become available. |
+| `run_any()`     | Return result of first completed function.     |
+
+To illustrate the behavior of each run function, let's first setup a hello world async program:
 
 ```python
-await aiometer.run_each(
-    fetch_and_process, urls, max_per_second=1
-)
+>>> import asyncio
+>>> import random
+>>> from functools import partial
+>>> import aiometer
+>>>
+>>> async def get_greeting(name):
+...     await asyncio.sleep(random.random())  # Simulate I/O
+...     return f"Hello, {name}"
+...
+>>> async def greet(name):
+...     greeting = await get_greeting(name)
+...     print(greeting)
+...
+>>> names = ["Robert", "Carmen", "Lucas"]
+```
+
+Let's start with `run_on_each()`. It executes an async function once for each item in a list passed as argument:
+
+```python
+>>> await aiometer.run_on_each(greet, names)
+'Hello, Robert!'
+'Hello, Lucas!'
+'Hello, Carmen!'
+```
+
+If we'd like to get the list of greetings in the same order as `names`, in a fashion similar to [`Promise.all()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all), we can use `run_all()`:
+
+```python
+>>> await aiometer.run_all([partial(get_greeting, name) for name in names])
+['Hello, Robert', 'Hello, Carmen!', 'Hello, Lucas!']
+```
+
+`amap()` allows us to process each greeting as it becomes available (which means maintaining order is not guaranteed):
+
+```python
+>>> async with aiometer.amap(get_greeting, names) as greetings:
+...     async for greeting in greetings:
+...         print(greeting)
+'Hello, Lucas!'
+'Hello, Robert!'
+'Hello, Carmen!'
+```
+
+Lastly, `run_any()` can be used to run async functions until the first one completes, similarly to [`Promise.any()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/any):
+
+```python
+>>> await aiometer.run_any([partial(get_greeting, name) for name in names])
+'Hello, Carmen!'
+```
+
+As a last fun example, let's use `amap()` to implement a no-threads async version of [sleep sort](https://rosettacode.org/wiki/Sorting_algorithms/Sleep_sort):
+
+```python
+>>> import asyncio
+>>> from functools import partial
+>>> import aiometer
+>>> numbers = [0.3, 0.1, 0.6, 0.2, 0.7, 0.5, 0.5, 0.2]
+>>> async def process(n):
+...     await asyncio.sleep(n)
+...     return n
+...
+>>> async with aiometer.amap(process, numbers) as results:
+...     sorted_numbers = [n async for n in results]
+...
+>>> sorted_numbers
+[0.1, 0.2, 0.2, 0.3, 0.5, 0.5, 0.6, 0.7]
 ```
 
 ## License
