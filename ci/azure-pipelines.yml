@@ -9,21 +9,26 @@ variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
 
 jobs:
-  - job: Check
+  - job: Test
+    strategy:
+      matrix:
+        Python37:
+          pythonVersion: "3.7"
+        Python38:
+          pythonVersion: "3.8"
+
     steps:
       - template: templates/install.yml
+        parameters:
+          pythonVersion: $(pythonVersion)
       - script: scripts/check
         displayName: "Run checks"
-
-  - job: Test
-    steps:
-      - template: templates/install.yml
       - script: scripts/test
         displayName: "Run tests"
       - script: |
-          if [ -f .coverage ]; then
-          python -m pip install codecov;
-          codecov --required;
+          if [ $(pythonVersion) = '3.8' ] & [ -f .coverage ]; then
+            python -m pip install codecov;
+            codecov --required;
           fi
         env:
           CODECOV_TOKEN: $(codecovToken)

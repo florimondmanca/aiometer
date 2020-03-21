@@ -32,8 +32,8 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
-    install_requires=["anyio==1.*"],
-    python_requires=">=3.8",
+    install_requires=["anyio==1.*", "typing-extensions==3.7.*; python_version<'3.8'"],
+    python_requires=">=3.7",
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -42,6 +42,8 @@ setup(
         "Framework :: AsyncIO",
         "Framework :: Trio",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
 )
