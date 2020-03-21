@@ -12,12 +12,23 @@ jobs:
   - job: Check
     steps:
       - template: templates/install.yml
+        parameters:
+          pythonVersion: "3.7"
       - script: scripts/check
         displayName: "Run checks"
 
   - job: Test
+    strategy:
+      matrix:
+        Python37:
+          pythonVersion: "3.7"
+        Python38:
+          pythonVersion: "3.8"
+
     steps:
       - template: templates/install.yml
+        parameters:
+          pythonVersion: $(pythonVersion)
       - script: scripts/test
         displayName: "Run tests"
       - script: |

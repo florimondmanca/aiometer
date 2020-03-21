@@ -1,8 +1,12 @@
+parameters:
+  - name: pythonVersion
+    type: string
+
 steps:
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: "3.8"
-    displayName: "Use Python"
+      versionSpec: "${{ parameters.pythonVersion }}"
+    displayName: "Use Python ${{ parameters.pythonVersion }}"
 
   - task: Cache@2
     inputs:
