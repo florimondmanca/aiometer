@@ -25,4 +25,6 @@ jobs:
           python -m pip install codecov;
           codecov --required;
           fi
+        env:
+          CODECOV_TOKEN: $(codecovToken)
         displayName: "Upload coverage"
