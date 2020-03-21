@@ -6,7 +6,6 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
-    Literal,
     Sequence,
     Tuple,
     overload,
@@ -17,6 +16,11 @@ import anyio
 from .._concurrency import open_memory_channel
 from ._run_on_each import run_on_each
 from ._types import T, U
+
+try:
+    from typing import Literal
+except ImportError:  # pragma: no cover
+    from typing_extensions import Literal  # type: ignore
 
 
 @overload
