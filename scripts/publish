@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-export PACKAGE="msgpack_asgi"
+export PACKAGE="aiometer"
 export VERSION=`cat src/${PACKAGE}/__version__.py | grep __version__ | sed "s/__version__ = //" | sed "s/'//g"`
 export PREFIX=""
 if [ -d 'venv' ] ; then
