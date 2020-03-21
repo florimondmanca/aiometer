@@ -1,0 +1,28 @@
+trigger:
+  - master
+
+pr:
+  - master
+
+variables:
+  CI: true
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
+
+jobs:
+  - job: Check
+    steps:
+      - template: templates/install.yml
+      - script: scripts/check
+        displayName: "Run checks"
+
+  - job: Test
+    steps:
+      - template: templates/install.yml
+      - script: scripts/test
+        displayName: "Run tests"
+      - script: |
+          if [ -f .coverage ]; then
+          python -m pip install codecov;
+          codecov --required;
+          fi
+        displayName: "Upload coverage"
