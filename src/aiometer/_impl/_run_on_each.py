@@ -1,14 +1,20 @@
-from typing import Any, Awaitable, Callable, List, Sequence
+from typing import Any, Awaitable, Callable, List, NamedTuple, Optional, Sequence
 
 import anyio
 
 from .._concurrency import MemorySendChannel
-from ._models import Config, MaxAtOnceMeter, Meter, TocketBucketMeter
+from ._meters import MaxAtOnceMeter, Meter, MeterState, TokenBucketMeter
 from ._types import T, U
 
 
+class _Config(NamedTuple):
+    include_index: bool
+    send_to: Optional[MemorySendChannel]
+    meter_states: List[MeterState]
+
+
 async def _worker(
-    async_fn: Callable[..., Awaitable[T]], index: int, value: T, config: Config
+    async_fn: Callable[[U], Awaitable[T]], index: int, value: U, config: _Config
 ) -> None:
     result: Any = await async_fn(value)
 
@@ -21,7 +27,7 @@ async def _worker(
         await state.notify_task_finished()
 
 
-async def run_each(
+async def run_on_each(
     async_fn: Callable[[U], Awaitable],
     args: Sequence[U],
     *,
@@ -35,11 +41,11 @@ async def run_each(
     if max_at_once is not None:
         meters.append(MaxAtOnceMeter(max_at_once))
     if max_per_second is not None:
-        meters.append(TocketBucketMeter(max_per_second))
+        meters.append(TokenBucketMeter(max_per_second))
 
     meter_states = [await meter.new_state() for meter in meters]
 
-    config = Config(
+    config = _Config(
         include_index=_include_index, send_to=_send_to, meter_states=meter_states
     )
 

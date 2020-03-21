@@ -1,8 +1,5 @@
-from typing import List, NamedTuple, Optional
-
 import anyio
 
-from .._concurrency import MemorySendChannel
 from ._utils import check_strictly_positive
 
 
@@ -46,14 +43,13 @@ class MaxAtOnceMeter(Meter):
         return type(self).State(self.max_at_once)
 
 
-class TocketBucketMeter(Meter):
+class TokenBucketMeter(Meter):
     class State(MeterState):
         def __init__(self, max_per_second: float, now: float) -> None:
             self.max_per_second = max_per_second
             self.max_bursts = 1  # TODO: make this configurable
             self.last_update_time = now
-            # Allow accumulating partial tokens.
-            self.tokens: float = 1
+            self.tokens = 1  # type: float  # Allow accumulating partial tokens.
 
         async def _update(self) -> None:
             now = await anyio.current_time()
@@ -67,8 +63,8 @@ class TocketBucketMeter(Meter):
                 await self._update()
                 if self.tokens >= 1:
                     break
-                next_token_after = max(0, (1 - self.tokens) / self.max_per_second)
-                await anyio.sleep(next_token_after)
+                wait_next_token = max(0, (1 - self.tokens) / self.max_per_second)
+                await anyio.sleep(wait_next_token)
 
         async def notify_task_started(self) -> None:
             await self._update()
@@ -86,9 +82,3 @@ class TocketBucketMeter(Meter):
     async def new_state(self) -> MeterState:
         now = await anyio.current_time()
         return type(self).State(self.max_per_second, now=now)
-
-
-class Config(NamedTuple):
-    include_index: bool
-    send_to: Optional[MemorySendChannel]
-    meter_states: List[MeterState]

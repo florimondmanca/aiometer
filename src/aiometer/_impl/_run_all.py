@@ -6,7 +6,7 @@ from ._utils import list_from_indexed_dict
 
 
 async def run_all(
-    async_fns: Sequence[Callable[..., Awaitable[T]]],
+    async_fns: Sequence[Callable[[], Awaitable[T]]],
     *,
     max_at_once: int = None,
     max_per_second: float = None,

@@ -5,7 +5,7 @@ from ._types import T
 
 
 async def run_any(
-    async_fns: Sequence[Callable[..., Awaitable[T]]],
+    async_fns: Sequence[Callable[[], Awaitable[T]]],
     *,
     max_at_once: int = None,
     max_per_second: float = None,
@@ -15,5 +15,5 @@ async def run_any(
         async_fns,
         max_at_once=max_at_once,
         max_per_second=max_per_second,
-    ) as amap_results:
-        return await (amap_results.__aiter__()).__anext__()
+    ) as results:
+        return await (results.__aiter__()).__anext__()
