@@ -20,10 +20,12 @@ def get_long_description() -> str:
 setup(
     name="aiometer",
     version=get_version("aiometer"),
-    description="A concurrency scheduling library for asyncio",
+    description=(
+        "A Python concurrency scheduling library, compatible with asyncio and trio"
+    ),
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    url="http://github.com/florimondmanca/msgpack-asgi",
+    url="http://github.com/florimondmanca/aiometer",
     author="Florimond Manca",
     author_email="florimond.manca@gmail.com",
     packages=find_packages("src"),
@@ -31,14 +33,15 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=["anyio==1.*"],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     license="MIT",
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
+        "Framework :: AsyncIO",
+        "Framework :: Trio",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
 )

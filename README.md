@@ -4,9 +4,9 @@
 [![Coverage](https://codecov.io/gh/florimondmanca/aiometer/branch/master/graph/badge.svg)](https://codecov.io/gh/florimondmanca/aiometer)
 [![Package version](https://badge.fury.io/py/aiometer.svg)](https://pypi.org/project/aiometer)
 
-`aiometer` is a concurrency scheduling library for `asyncio` and `trio`, inspired by [Trimeter](https://github.com/python-trio/trimeter). It makes it easier to execute lots of tasks concurrently while controlling concurrency limits (i.e. applying _[backpressure](https://lucumr.pocoo.org/2020/1/1/async-pressure/)_) and collecting results in a predictable manner.
+`aiometer` is a Python concurrency scheduling library compatible with `asyncio` and `trio` and inspired by [Trimeter](https://github.com/python-trio/trimeter). It makes it easier to execute lots of tasks concurrently while controlling concurrency limits (i.e. applying _[backpressure](https://lucumr.pocoo.org/2020/1/1/async-pressure/)_) and collecting results in a predictable manner.
 
-_This is a design document and a work in progress. Not even guaranteed to lead to a published alpha._
+_This project is currently in early alpha. Be sure to pin any dependencies to the latest minor._
 
 **Content**
 
@@ -69,7 +69,7 @@ _Try this code interactively using [IPython](https://ipython.org/install.html)._
 ## Installation
 
 ```bash
-pip install git+https://github.com/florimondmanca/aiometer.git@master
+pip install "aiometer==0.1.*"
 ```
 
 ## Features
