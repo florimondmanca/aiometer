@@ -20,7 +20,7 @@ def get_long_description() -> str:
 setup(
     name="aiometer",
     version=get_version("aiometer"),
-    description="Concurrency scheduling library for asyncio",
+    description="A concurrency scheduling library for asyncio",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     url="http://github.com/florimondmanca/msgpack-asgi",
