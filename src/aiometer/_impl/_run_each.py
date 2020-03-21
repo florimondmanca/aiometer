@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable, List, Sequence
 import anyio
 
 from .._concurrency import MemorySendChannel
-from ._models import Config, MaxAtOnceMeter, Meter
+from ._models import Config, MaxAtOnceMeter, Meter, TocketBucketMeter
 from ._types import T, U
 
 
@@ -26,6 +26,7 @@ async def run_each(
     args: Sequence[U],
     *,
     max_at_once: int = None,
+    max_per_second: float = None,
     _include_index: bool = False,
     _send_to: MemorySendChannel = None,
 ) -> None:
@@ -33,8 +34,10 @@ async def run_each(
 
     if max_at_once is not None:
         meters.append(MaxAtOnceMeter(max_at_once))
+    if max_per_second is not None:
+        meters.append(TocketBucketMeter(max_per_second))
 
-    meter_states = [meter.new_state() for meter in meters]
+    meter_states = [await meter.new_state() for meter in meters]
 
     config = Config(
         include_index=_include_index, send_to=_send_to, meter_states=meter_states
@@ -46,6 +49,6 @@ async def run_each(
                 await state.wait_task_can_start()
 
             for state in meter_states:
-                state.notify_task_started()
+                await state.notify_task_started()
 
             await task_group.spawn(_worker, async_fn, index, value, config)

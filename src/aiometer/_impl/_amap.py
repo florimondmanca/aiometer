@@ -25,6 +25,7 @@ def amap(
     args: Sequence[U],
     *,
     max_at_once: int = None,
+    max_per_second: float = None,
     _include_index: Literal[False] = False,
 ) -> AsyncContextManager[AsyncIterable[T]]:
     ...  # pragma: no cover
@@ -36,6 +37,7 @@ def amap(
     args: Sequence[U],
     *,
     max_at_once: int = None,
+    max_per_second: float = None,
     _include_index: Literal[True],
 ) -> AsyncContextManager[AsyncIterable[Tuple[int, T]]]:
     ...  # pragma: no cover
@@ -49,6 +51,7 @@ def amap(
     args: Sequence[U],
     *,
     max_at_once: int = None,
+    max_per_second: float = None,
     _include_index: bool = False,
 ) -> AsyncContextManager[AsyncIterable]:
     @asynccontextmanager
@@ -65,6 +68,7 @@ def amap(
                         async_fn,
                         args,
                         max_at_once=max_at_once,
+                        max_per_second=max_per_second,
                         _include_index=_include_index,
                         _send_to=send_channel,
                     )
