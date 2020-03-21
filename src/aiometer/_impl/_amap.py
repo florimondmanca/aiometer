@@ -18,9 +18,9 @@ from ._run_on_each import run_on_each
 from ._types import T, U
 
 try:
-    from typing import Literal
+    from typing_extensions import Literal  # Python 3.7.
 except ImportError:  # pragma: no cover
-    from typing_extensions import Literal  # type: ignore
+    from typing import Literal  # type: ignore
 
 
 @overload
