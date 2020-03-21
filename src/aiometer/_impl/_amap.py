@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from typing import (
+    Any,
     AsyncContextManager,
     AsyncIterable,
     AsyncIterator,
@@ -20,17 +21,10 @@ from ._types import T, U
 
 @overload
 def amap(
-    async_fn: Callable[[U], Awaitable[T]], args: Sequence[U],
-) -> AsyncContextManager[AsyncIterable[Tuple[T]]]:
-    ...  # pragma: no cover
-
-
-@overload
-def amap(
     async_fn: Callable[[U], Awaitable[T]],
     args: Sequence[U],
-    _include_index: Literal[False],
-) -> AsyncContextManager[AsyncIterable[Tuple[T]]]:
+    _include_index: Literal[False] = False,
+) -> AsyncContextManager[AsyncIterable[T]]:
     ...  # pragma: no cover
 
 
@@ -47,13 +41,11 @@ def amap(
 # manager. (The `AsyncIterator` annotation is correct here, but confusing to type
 # checkers on the client side.)
 def amap(
-    async_fn: Callable[[U], Awaitable[T]],
-    args: Sequence[U],
-    _include_index: bool = False,
-) -> AsyncContextManager[AsyncIterable[T]]:
+    async_fn: Callable[[U], Awaitable], args: Sequence[U], _include_index: bool = False,
+) -> AsyncContextManager[AsyncIterable]:
     @asynccontextmanager
-    async def _amap() -> AsyncIterator[AsyncIterable[T]]:
-        receive_channel, send_channel = open_memory_channel[T](
+    async def _amap() -> AsyncIterator[AsyncIterable]:
+        receive_channel, send_channel = open_memory_channel[Any](
             max_buffer_size=len(args)
         )
 

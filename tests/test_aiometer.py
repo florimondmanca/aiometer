@@ -76,3 +76,14 @@ async def test_run_all() -> None:
 
     assert await aiometer.run_all([process_fast, process_slow]) == ["fast", "slow"]
     assert await aiometer.run_all([process_slow, process_fast]) == ["slow", "fast"]
+
+
+async def test_run_any() -> None:
+    async def process_fast() -> str:
+        return "fast"
+
+    async def process_slow() -> str:
+        await asyncio.sleep(0.1)
+        return "slow"
+
+    assert await aiometer.run_any([process_slow, process_fast]) == "fast"
