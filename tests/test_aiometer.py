@@ -10,91 +10,79 @@ import aiometer
 
 
 @pytest.mark.anyio
-async def test_run_each() -> None:
-    output = set()
+class TestRunners:
+    async def test_run_each(self) -> None:
+        output = set()
 
-    async def process(item: str) -> None:
-        output.add(item)
+        async def process(item: str) -> None:
+            output.add(item)
 
-    items = ["apple", "banana", "cherry", "apple"]
+        items = ["apple", "banana", "cherry", "apple"]
+        result = await aiometer.run_each(process, items)
 
-    result = await aiometer.run_each(process, items)
-    assert result is None
+        assert result is None
+        assert output == {"apple", "banana", "cherry"}
 
-    assert output == {"apple", "banana", "cherry"}
+    async def test_amap(self) -> None:
+        async def process(item: str) -> str:
+            return item.capitalize()
 
-
-@pytest.mark.anyio
-async def test_amap() -> None:
-    async def process(item: str) -> str:
-        return item.capitalize()
-
-    items = ["apple", "banana", "cherry", "apple"]
-
-    async with aiometer.amap(process, items) as results:
-        output = {result async for result in results}
-
-    assert output == {"Apple", "Banana", "Cherry"}
-
-
-@pytest.mark.anyio
-async def test_amap_ignore_results() -> None:
-    called = 0
-
-    async def process(item: str) -> None:
-        nonlocal called
-        called += 1
-
-    items = ["apple", "banana", "cherry", "apple"]
-
-    async with aiometer.amap(process, items):
-        pass
-
-    # Should have waited for all tasks to complete before exiting.
-    assert called == 4
-
-
-@pytest.mark.anyio
-async def test_amap_task_exception() -> None:
-    class Failure(Exception):
-        pass
-
-    async def process(item: str) -> str:
-        if item == "fail":
-            raise Failure
-        return item
-
-    items = ["apple", "banana", "fail", "apple"]
-
-    with pytest.raises(Failure):
+        items = ["apple", "banana", "cherry", "apple"]
         async with aiometer.amap(process, items) as results:
-            async for result in results:
-                pass
+            output = {result async for result in results}
 
+        assert output == {"Apple", "Banana", "Cherry"}
 
-@pytest.mark.anyio
-async def test_run_all() -> None:
-    async def process_fast() -> str:
-        return "fast"
+    async def test_amap_ignore_results(self) -> None:
+        called = 0
 
-    async def process_slow() -> str:
-        await anyio.sleep(0.01)
-        return "slow"
+        async def process(item: str) -> None:
+            nonlocal called
+            called += 1
 
-    assert await aiometer.run_all([process_fast, process_slow]) == ["fast", "slow"]
-    assert await aiometer.run_all([process_slow, process_fast]) == ["slow", "fast"]
+        items = ["apple", "banana", "cherry", "apple"]
+        async with aiometer.amap(process, items):
+            pass
 
+        # Should have waited for all tasks to complete before exiting.
+        assert called == 4
 
-@pytest.mark.anyio
-async def test_run_any() -> None:
-    async def process_fast() -> str:
-        return "fast"
+    # TODO: allow managing exceptions via `outcome`?
+    async def test_amap_task_exception(self) -> None:
+        class Failure(Exception):
+            pass
 
-    async def process_slow() -> str:
-        await anyio.sleep(0.01)
-        return "slow"
+        async def process(item: str) -> str:
+            if item == "fail":
+                raise Failure
+            return item
 
-    assert await aiometer.run_any([process_slow, process_fast]) == "fast"
+        items = ["apple", "banana", "fail", "apple"]
+        with pytest.raises(Failure):
+            async with aiometer.amap(process, items) as results:
+                async for result in results:
+                    pass
+
+    async def test_run_all(self) -> None:
+        async def process_fast() -> str:
+            return "fast"
+
+        async def process_slow() -> str:
+            await anyio.sleep(0.01)
+            return "slow"
+
+        assert await aiometer.run_all([process_fast, process_slow]) == ["fast", "slow"]
+        assert await aiometer.run_all([process_slow, process_fast]) == ["slow", "fast"]
+
+    async def test_run_any(self) -> None:
+        async def process_fast() -> str:
+            return "fast"
+
+        async def process_slow() -> str:
+            await anyio.sleep(0.01)
+            return "slow"
+
+        assert await aiometer.run_any([process_slow, process_fast]) == "fast"
 
 
 @pytest.mark.anyio
@@ -196,7 +184,7 @@ class TestMaxPerSecond:
         num_tasks = int(max(self.values) / task_seconds)
 
         spy = self._Spy(num_tasks=num_tasks, task=lambda: anyio.sleep(task_seconds))
-        wait = task_seconds * 1.05  # Give it a better chance to spawn all tasks.
+        wait = task_seconds * 1.1  # Give it a better chance to spawn all tasks.
         async with anyio.move_on_after(wait):
             yield spy
 
