@@ -70,7 +70,7 @@ _Try this code interactively using [IPython](https://ipython.org/install.html)._
 ## Installation
 
 ```bash
-pip install "aiometer==0.1.*"
+pip install "aiometer==0.2.*"
 ```
 
 ## Features
