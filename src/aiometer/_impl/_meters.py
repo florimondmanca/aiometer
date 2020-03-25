@@ -19,7 +19,7 @@ class Meter:
         raise NotImplementedError  # pragma: no cover
 
 
-class MaxAtOnceMeter(Meter):
+class HardLimitMeter(Meter):
     class State(MeterState):
         def __init__(self, max_at_once: int) -> None:
             self.semaphore = anyio.create_semaphore(max_at_once)
