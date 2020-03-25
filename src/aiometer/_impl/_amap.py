@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from typing import (
+    TYPE_CHECKING,
     Any,
     AsyncContextManager,
     AsyncIterable,
@@ -17,10 +18,12 @@ from .._concurrency import open_memory_channel
 from ._run_on_each import run_on_each
 from ._types import T, U
 
-try:
-    from typing_extensions import Literal  # Python 3.7.
-except ImportError:  # pragma: no cover
-    from typing import Literal  # type: ignore
+if TYPE_CHECKING:
+    # Allow mypy to use `Literal` although it may not be available at runtime.
+    try:
+        from typing import Literal  # type: ignore
+    except ImportError:  # pragma: no cover
+        from typing_extensions import Literal  # type: ignore  # Python 3.7 (maybe).
 
 
 @overload
@@ -30,7 +33,7 @@ def amap(
     *,
     max_at_once: int = None,
     max_per_second: float = None,
-    _include_index: Literal[False] = False,
+    _include_index: "Literal[False]" = False,
 ) -> AsyncContextManager[AsyncIterable[T]]:
     ...  # pragma: no cover
 
@@ -42,7 +45,7 @@ def amap(
     *,
     max_at_once: int = None,
     max_per_second: float = None,
-    _include_index: Literal[True],
+    _include_index: "Literal[True]",
 ) -> AsyncContextManager[AsyncIterable[Tuple[int, T]]]:
     ...  # pragma: no cover
 
