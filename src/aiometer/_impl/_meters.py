@@ -43,34 +43,34 @@ class MaxAtOnceMeter(Meter):
         return type(self).State(self.max_at_once)
 
 
-class TokenBucketMeter(Meter):
+class RateLimitMeter(Meter):
     class State(MeterState):
-        def __init__(self, max_per_second: float, now: float) -> None:
-            self.max_per_second = max_per_second
-            self.max_bursts = 1  # TODO: make this configurable
-            self.last_update_time = now
-            self.tokens = 1  # type: float  # Allow accumulating partial tokens.
+        def __init__(self, max_per_second: float) -> None:
+            self.period = 1 / max_per_second
+            self.max_per_period = 1  # TODO: make configurable.
+            self.next_start_time = 0.0
 
-        async def _update(self) -> None:
-            now = await anyio.current_time()
-            elapsed = now - self.last_update_time
-            self.tokens += elapsed * self.max_per_second
-            self.tokens = min(self.tokens, self.max_bursts)
-            self.last_update_time = now
+        @property
+        def task_delta(self) -> float:
+            return self.period / self.max_per_period
 
         async def wait_task_can_start(self) -> None:
             while True:
-                await self._update()
-                if self.tokens >= 1:
+                # NOTE: this is an implementation of the "virtual scheduling" variant
+                # of the GCRA algorithm.
+                # `next_start_time` represents the TAT (theoretical time of arrival).
+                # See: https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
+                now = await anyio.current_time()
+                next_start_time = max(self.next_start_time, now)
+                time_until_start = next_start_time - now
+                threshold = self.period - self.task_delta
+                if time_until_start <= threshold:
                     break
-                wait_next_token = max(0, (1 - self.tokens) / self.max_per_second)
-                await anyio.sleep(wait_next_token)
+                await anyio.sleep(max(0, time_until_start - threshold))
 
         async def notify_task_started(self) -> None:
-            await self._update()
-            if self.tokens < 1:  # pragma: no cover
-                raise RuntimeError("Should be at least one token left")
-            self.tokens -= 1
+            now = await anyio.current_time()
+            self.next_start_time = max(self.next_start_time, now) + self.task_delta
 
         async def notify_task_finished(self) -> None:
             pass
@@ -80,5 +80,4 @@ class TokenBucketMeter(Meter):
         self.max_per_second = max_per_second
 
     async def new_state(self) -> MeterState:
-        now = await anyio.current_time()
-        return type(self).State(self.max_per_second, now=now)
+        return type(self).State(self.max_per_second)
