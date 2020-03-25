@@ -1,6 +1,6 @@
 import random
-from contextlib import asynccontextmanager, contextmanager
-from typing import Any, AsyncIterator, Iterator, List
+from contextlib import contextmanager
+from typing import Any, Iterator, List
 
 import anyio
 import pytest
@@ -146,7 +146,7 @@ class TestMaxAtOnce:
 
 @pytest.mark.anyio
 class TestMaxPerSecond:
-    class _Spy:
+    class Spy:
         def __init__(self, num_tasks: int) -> None:
             self.tasks = [self.task for _ in range(num_tasks)]
             self.args = [None for _ in range(num_tasks)]
@@ -162,28 +162,29 @@ class TestMaxPerSecond:
 
     max_per_second_params = [5, 10, 20, 30, 40, 50, 70, 100]
 
-    @asynccontextmanager
-    async def create_spy(self, max_per_second: float) -> AsyncIterator["_Spy"]:
-        spy = self._Spy(num_tasks=3)
+    @classmethod
+    @contextmanager
+    def assert_limit(cls, max_per_second: float) -> Iterator["Spy"]:
+        spy = cls.Spy(num_tasks=3)
         yield spy
         period = 1 / max_per_second
         assert spy.max_task_delta == pytest.approx(period, rel=0.75)
 
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_run_on_each(self, max_per_second: float) -> None:
-        async with self.create_spy(max_per_second) as spy:
+        with self.assert_limit(max_per_second) as spy:
             await aiometer.run_on_each(
                 spy.task, spy.args, max_per_second=max_per_second
             )
 
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_run_all(self, max_per_second: float) -> None:
-        async with self.create_spy(max_per_second) as spy:
+        with self.assert_limit(max_per_second) as spy:
             await aiometer.run_all(spy.tasks, max_per_second=max_per_second)
 
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_amap(self, max_per_second: float) -> None:
-        async with self.create_spy(max_per_second) as spy:
+        with self.assert_limit(max_per_second) as spy:
             async with aiometer.amap(
                 spy.task, spy.args, max_per_second=max_per_second
             ) as results:
@@ -192,5 +193,5 @@ class TestMaxPerSecond:
 
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_run_any(self, max_per_second: float) -> None:
-        async with self.create_spy(max_per_second) as spy:
+        with self.assert_limit(max_per_second) as spy:
             await aiometer.run_any(spy.tasks, max_per_second=max_per_second)
