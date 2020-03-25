@@ -1,7 +1,7 @@
 import random
 import time
-from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, Awaitable, Callable, List
+from contextlib import asynccontextmanager, contextmanager
+from typing import Any, AsyncIterator, Awaitable, Callable, Iterator, List
 
 import anyio
 import pytest
@@ -87,72 +87,60 @@ class TestRunners:
 
 @pytest.mark.anyio
 class TestMaxAtOnce:
-    class _Spy:
+    class Spy:
         def __init__(self, num_tasks: int) -> None:
             self.num_tasks = num_tasks
             self.num_running = 0
             self.max_running = 0
+            self.async_fns = [self.async_fn for _ in range(self.num_tasks)]
+            self.args = [None for _ in range(self.num_tasks)]
 
-        def build_args(self) -> List[None]:
-            return [None for _ in range(self.num_tasks)]
-
-        def build_tasks(self) -> list:
-            return [self.process for _ in range(self.num_tasks)]
-
-        async def process(self, *args: Any) -> None:
+        async def async_fn(self, *args: Any) -> None:
             self.num_running += 1
             self.max_running = max(self.num_running, self.max_running)
             await anyio.sleep(0.01 * random.random())
             self.num_running -= 1
 
-        def assert_max_tasks_respected(self, max_at_once: int) -> None:
-            assert self.max_running <= max_at_once
+    max_at_once_params = [1, 2, 5, 10, 20]
 
-    num_tasks = 10
-    values = [1, 2, 5, 10, 20]
+    @classmethod
+    @contextmanager
+    def assert_limit(cls, max_at_once: int) -> Iterator["Spy"]:
+        spy = cls.Spy(num_tasks=max(cls.max_at_once_params) + 10)
+        yield spy
+        assert 0 < spy.max_running <= max_at_once
 
-    def create_spy(self) -> "_Spy":
-        return self._Spy(num_tasks=self.num_tasks)
-
-    @pytest.mark.parametrize("max_at_once", values)
+    @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_run_on_each(self, max_at_once: int) -> None:
-        spy = self.create_spy()
-        await aiometer.run_on_each(
-            spy.process, spy.build_args(), max_at_once=max_at_once
-        )
-        spy.assert_max_tasks_respected(max_at_once)
+        with self.assert_limit(max_at_once) as spy:
+            await aiometer.run_on_each(spy.async_fn, spy.args, max_at_once=max_at_once)
 
-    @pytest.mark.parametrize("max_at_once", values)
+    @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_run_all(self, max_at_once: int) -> None:
-        spy = self.create_spy()
-        await aiometer.run_all(spy.build_tasks(), max_at_once=max_at_once)
-        spy.assert_max_tasks_respected(max_at_once)
+        with self.assert_limit(max_at_once) as spy:
+            await aiometer.run_all(spy.async_fns, max_at_once=max_at_once)
 
-    @pytest.mark.parametrize("max_at_once", values)
+    @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_amap(self, max_at_once: int) -> None:
-        spy = self.create_spy()
+        with self.assert_limit(max_at_once) as spy:
+            async with aiometer.amap(
+                spy.async_fn, spy.args, max_at_once=max_at_once
+            ) as results:
+                async for _ in results:
+                    pass  # pragma: no cover  # Python 3.7 fix.
 
-        async with aiometer.amap(
-            spy.process, spy.build_args(), max_at_once=max_at_once
-        ) as results:
-            async for _ in results:
-                pass  # pragma: no cover  # Python 3.7 fix.
-
-        spy.assert_max_tasks_respected(max_at_once)
-
-    @pytest.mark.parametrize("max_at_once", values)
+    @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_run_any(self, max_at_once: int) -> None:
-        spy = self.create_spy()
-        await aiometer.run_any(spy.build_tasks(), max_at_once=max_at_once)
-        spy.assert_max_tasks_respected(max_at_once)
+        with self.assert_limit(max_at_once) as spy:
+            await aiometer.run_any(spy.async_fns, max_at_once=max_at_once)
 
     @pytest.mark.parametrize("max_at_once", (0, -1, -10))
     async def test_max_at_once_must_be_positive(self, max_at_once: int) -> None:
-        async def process(item: str) -> None:
+        async def async_fn(item: str) -> None:
             pass  # pragma: no cover
 
         with pytest.raises(ValueError):
-            await aiometer.run_on_each(process, ["test"], max_at_once=max_at_once)
+            await aiometer.run_on_each(async_fn, ["test"], max_at_once=max_at_once)
 
 
 @pytest.mark.anyio
