@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable, List, NamedTuple, Optional, Sequenc
 import anyio
 
 from .._concurrency import MemorySendChannel
-from ._meters import HardLimitMeter, Meter, MeterState, TokenBucketMeter
+from ._meters import HardLimitMeter, Meter, MeterState, RateLimitMeter
 from ._types import T, U
 
 
@@ -41,7 +41,7 @@ async def run_on_each(
     if max_at_once is not None:
         meters.append(HardLimitMeter(max_at_once))
     if max_per_second is not None:
-        meters.append(TokenBucketMeter(max_per_second))
+        meters.append(RateLimitMeter(max_per_second))
 
     meter_states = [await meter.new_state() for meter in meters]
 
