@@ -14,8 +14,8 @@ from typing import (
 import anyio
 
 from .._concurrency import open_memory_channel
-from ._run_on_each import run_on_each
-from ._types import T, U
+from .run_on_each import run_on_each
+from .types import T, U
 
 try:
     from typing_extensions import Literal  # Python 3.7.

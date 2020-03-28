@@ -2,7 +2,7 @@ from textwrap import dedent
 from types import LambdaType
 from typing import Callable, List, Mapping, Sequence
 
-from ._types import T
+from .types import T
 
 
 def list_from_indexed_dict(dct: Mapping[int, T]) -> List[T]:

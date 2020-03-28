@@ -1,8 +1,8 @@
 from typing import Awaitable, Callable, Dict, List, Sequence
 
-from ._amap import amap
-from ._types import T
-from ._utils import check_no_lambdas, list_from_indexed_dict
+from .amap import amap
+from .types import T
+from .utils import check_no_lambdas, list_from_indexed_dict
 
 
 async def run_all(
