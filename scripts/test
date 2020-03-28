@@ -10,4 +10,4 @@ if [ -z $CI ]; then
 fi
 
 set -x
-${PREFIX}pytest $@
+${PREFIX}pytest "$@"

@@ -128,16 +128,19 @@ class TestMaxAtOnce:
         yield spy
         assert 0 < spy.max_running <= max_at_once
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_run_on_each(self, max_at_once: int) -> None:
         with self.assert_limit(max_at_once) as spy:
             await aiometer.run_on_each(spy.async_fn, spy.args, max_at_once=max_at_once)
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_run_all(self, max_at_once: int) -> None:
         with self.assert_limit(max_at_once) as spy:
             await aiometer.run_all(spy.async_fns, max_at_once=max_at_once)
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_amap(self, max_at_once: int) -> None:
         with self.assert_limit(max_at_once) as spy:
@@ -147,6 +150,7 @@ class TestMaxAtOnce:
                 async for _ in results:
                     pass  # pragma: no cover  # Python 3.7 fix.
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_at_once", max_at_once_params)
     async def test_run_any(self, max_at_once: int) -> None:
         with self.assert_limit(max_at_once) as spy:
@@ -187,6 +191,7 @@ class TestMaxPerSecond:
         period = 1 / max_per_second
         assert spy.max_task_delta == pytest.approx(period, rel=0.75)
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_run_on_each(self, max_per_second: float) -> None:
         with self.assert_limit(max_per_second) as spy:
@@ -194,11 +199,13 @@ class TestMaxPerSecond:
                 spy.task, spy.args, max_per_second=max_per_second
             )
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_run_all(self, max_per_second: float) -> None:
         with self.assert_limit(max_per_second) as spy:
             await aiometer.run_all(spy.tasks, max_per_second=max_per_second)
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_amap(self, max_per_second: float) -> None:
         with self.assert_limit(max_per_second) as spy:
@@ -208,6 +215,7 @@ class TestMaxPerSecond:
                 async for _ in results:
                     pass  # pragma: no cover  # Python 3.7 fix.
 
+    @pytest.mark.slow
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
     async def test_run_any(self, max_per_second: float) -> None:
         with self.assert_limit(max_per_second) as spy:
