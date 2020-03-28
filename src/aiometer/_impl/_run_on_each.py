@@ -1,10 +1,10 @@
-from typing import Any, Awaitable, Callable, List, NamedTuple, Optional, Sequence
+from typing import Awaitable, Callable, List, NamedTuple, Optional, Sequence
 
 import anyio
 
 from .._concurrency import MemorySendChannel
 from ._meters import HardLimitMeter, Meter, MeterState, RateLimitMeter
-from ._types import T, U
+from ._types import T
 
 
 class _Config(NamedTuple):
@@ -14,9 +14,9 @@ class _Config(NamedTuple):
 
 
 async def _worker(
-    async_fn: Callable[[U], Awaitable[T]], index: int, value: U, config: _Config
+    async_fn: Callable[[T], Awaitable], index: int, value: T, config: _Config
 ) -> None:
-    result: Any = await async_fn(value)
+    result = await async_fn(value)
 
     if config.send_to is not None:
         if config.include_index:
@@ -28,8 +28,8 @@ async def _worker(
 
 
 async def run_on_each(
-    async_fn: Callable[[U], Awaitable],
-    args: Sequence[U],
+    async_fn: Callable[[T], Awaitable],
+    args: Sequence[T],
     *,
     max_at_once: int = None,
     max_per_second: float = None,

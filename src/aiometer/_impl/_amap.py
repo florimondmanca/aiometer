@@ -25,25 +25,25 @@ except ImportError:  # pragma: no cover
 
 @overload
 def amap(
-    async_fn: Callable[[U], Awaitable[T]],
-    args: Sequence[U],
+    async_fn: Callable[[T], Awaitable[U]],
+    args: Sequence[T],
     *,
     max_at_once: int = None,
     max_per_second: float = None,
     _include_index: Literal[False] = False,
-) -> AsyncContextManager[AsyncIterable[T]]:
+) -> AsyncContextManager[AsyncIterable[U]]:
     ...  # pragma: no cover
 
 
 @overload
 def amap(
-    async_fn: Callable[[U], Awaitable[T]],
-    args: Sequence[U],
+    async_fn: Callable[[T], Awaitable[U]],
+    args: Sequence[T],
     *,
     max_at_once: int = None,
     max_per_second: float = None,
     _include_index: Literal[True],
-) -> AsyncContextManager[AsyncIterable[Tuple[int, T]]]:
+) -> AsyncContextManager[AsyncIterable[Tuple[int, U]]]:
     ...  # pragma: no cover
 
 
@@ -51,8 +51,8 @@ def amap(
 # manager. (The `AsyncIterator` annotation is correct here, but confusing to type
 # checkers on the client side.)
 def amap(
-    async_fn: Callable[[U], Awaitable],
-    args: Sequence[U],
+    async_fn: Callable[[Any], Awaitable],
+    args: Sequence,
     *,
     max_at_once: int = None,
     max_per_second: float = None,
