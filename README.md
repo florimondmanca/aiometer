@@ -200,17 +200,40 @@ As a last fun example, let's use `amap()` to implement a no-threads async versio
 
 #### Multiple parametrized values in `run_on_each` and `amap`
 
-`run_on_each` and `amap` can only accept functions that are parametrized by a single positional argument.
+`run_on_each` and `amap` only accept functions that accept a single positional argument (i.e. `(Any) -> Awaitable`).
 
-If you need to parametrize a function by multiple values, you should build a container type (eg a `namedtuple`), and build a single list using `zip()`. For example...
+So if you have a function that is parametrized by multiple values, you should refactor it to match this form.
+
+This can generally be achieved like this:
+
+1. Build a proxy container type (eg. a `namedtuple`), eg `T`.
+2. Refactor your function so that its signature is now `(T) -> Awaitable`.
+3. Build a list of these proxy containers, and pass it to `aiometer`.
+
+For example, assuming you have a function that processes X/Y coordinates...
+
+```python
+async def process(x: float, y: float) -> None:
+    pass
+
+xs = list(range(100))
+ys = list(range(100))
+
+for x, y in zip(xs, ys):
+    await process(x, y)
+```
+
+You could use it with `amap` by refactoring it like this:
 
 ```python
 from typing import NamedTuple
 
+# Proxy container type:
 class Point(NamedTuple):
     x: float
     y: float
 
+# Rewrite to accept a proxy as a single positional argument:
 async def process(point: Point) -> None:
     x = point.x
     y = point.y
@@ -218,8 +241,11 @@ async def process(point: Point) -> None:
 
 xs = list(range(100))
 ys = list(range(100))
+
+# Build a list of proxy containers:
 points = [Point(x, y) for x, y in zip(x, y)]
 
+# Use it:
 async with aiometer.amap(process, points) as results:
     ...
 ```
