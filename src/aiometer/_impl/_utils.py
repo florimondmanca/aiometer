@@ -25,7 +25,7 @@ def is_lambda(func: Callable) -> bool:
 
 
 def _truncate_seq_str(seq: Sequence, max_size: int) -> str:
-    if len(seq) <= max_size:
+    if len(seq) <= max_size:  # pragma: no cover
         return str(seq)
     content = ", ".join(repr(item) for item in seq[:max_size])
     return f"[{content}, ...]"

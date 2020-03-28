@@ -90,7 +90,7 @@ class TestRunners:
         items = ["apple", "banana", "cherry", "apple"]
 
         async def process(item: str) -> None:
-            pass
+            pass  # pragma: no cover
 
         async_fns = [lambda: process(item) for item in items]
 
