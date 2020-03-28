@@ -1,6 +1,6 @@
 import random
 from contextlib import contextmanager
-from typing import Any, Iterator, List
+from typing import Any, Callable, Iterator, List
 
 import anyio
 import pytest
@@ -84,6 +84,23 @@ class TestRunners:
             return "slow"
 
         assert await aiometer.run_any([process_slow, process_fast]) == "fast"
+
+    @pytest.mark.parametrize("run", [aiometer.run_all, aiometer.run_any])
+    async def test_disallow_buggy_lambdas(self, run: Callable) -> None:
+        items = ["apple", "banana", "cherry", "apple"]
+
+        async def process(item: str) -> None:
+            pass  # pragma: no cover
+
+        async_fns = [lambda: process(item) for item in items]
+
+        with pytest.raises(ValueError) as exc_info:
+            await run(async_fns)
+
+        # Ensure the message is specific and provides a hint for a fix.
+        message = str(exc_info.value)
+        assert run.__name__ in message
+        assert "functools.partial" in message
 
 
 @pytest.mark.anyio

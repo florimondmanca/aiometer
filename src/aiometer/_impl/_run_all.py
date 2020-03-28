@@ -2,7 +2,7 @@ from typing import Awaitable, Callable, Dict, List, Sequence
 
 from ._amap import amap
 from ._types import T
-from ._utils import list_from_indexed_dict
+from ._utils import check_no_lambdas, list_from_indexed_dict
 
 
 async def run_all(
@@ -11,6 +11,8 @@ async def run_all(
     max_at_once: int = None,
     max_per_second: float = None,
 ) -> List[T]:
+    check_no_lambdas(async_fns, entrypoint="aiometer.run_all")
+
     results: Dict[int, T] = {}
 
     async with amap(

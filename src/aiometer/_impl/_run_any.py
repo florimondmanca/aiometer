@@ -2,6 +2,7 @@ from typing import Awaitable, Callable, Sequence
 
 from ._amap import amap
 from ._types import T
+from ._utils import check_no_lambdas
 
 
 async def run_any(
@@ -10,6 +11,8 @@ async def run_any(
     max_at_once: int = None,
     max_per_second: float = None,
 ) -> T:
+    check_no_lambdas(async_fns, entrypoint="aiometer.run_any")
+
     async with amap(
         lambda fn: fn(),
         async_fns,
