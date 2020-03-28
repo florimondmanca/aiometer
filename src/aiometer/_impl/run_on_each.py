@@ -3,8 +3,8 @@ from typing import Awaitable, Callable, List, NamedTuple, Optional, Sequence
 import anyio
 
 from .._concurrency import MemorySendChannel
-from ._meters import HardLimitMeter, Meter, MeterState, RateLimitMeter
-from ._types import T
+from .meters import HardLimitMeter, Meter, MeterState, RateLimitMeter
+from .types import T
 
 
 class _Config(NamedTuple):

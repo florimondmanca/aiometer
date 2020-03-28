@@ -1,8 +1,8 @@
 from typing import Awaitable, Callable, Sequence
 
-from ._amap import amap
-from ._types import T
-from ._utils import check_no_lambdas
+from .amap import amap
+from .types import T
+from .utils import check_no_lambdas
 
 
 async def run_any(

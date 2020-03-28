@@ -1,6 +1,6 @@
 import anyio
 
-from ._utils import check_strictly_positive
+from .utils import check_strictly_positive
 
 
 class MeterState:

@@ -1,5 +1,5 @@
 """
-A basic implementation of trio's memory channels over anyio.
+A basic implementation of trio's memory channels for anyio.
 See: https://trio.readthedocs.io/en/stable/reference-core.html#trio.open_memory_channel
 """
 import types
