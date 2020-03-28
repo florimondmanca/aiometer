@@ -17,6 +17,7 @@ _This project is currently in early alpha. Be sure to pin any dependencies to th
 - [Guide](#guide)
   - [Flow control](#flow-control)
   - [Running tasks](#running-tasks)
+  - [How To](#how-to)
 
 ## Example
 
@@ -193,6 +194,34 @@ As a last fun example, let's use `amap()` to implement a no-threads async versio
 ...
 >>> sorted_numbers
 [0.1, 0.2, 0.2, 0.3, 0.5, 0.5, 0.6, 0.7]
+```
+
+### How To
+
+#### Multiple parametrized values in `run_on_each` and `amap`
+
+`run_on_each` and `amap` can only accept functions that are parametrized by a single positional argument.
+
+If you need to parametrize a function by multiple values, you should build a container type (eg a `namedtuple`), and build a single list using `zip()`. For example...
+
+```python
+from typing import NamedTuple
+
+class Point(NamedTuple):
+    x: float
+    y: float
+
+async def process(point: Point) -> None:
+    x = point.x
+    y = point.y
+    ...
+
+xs = list(range(100))
+ys = list(range(100))
+points = [Point(x, y) for x, y in zip(x, y)]
+
+async with aiometer.amap(process, points) as results:
+    ...
 ```
 
 ## License
