@@ -4,7 +4,7 @@ resources:
       type: github
       endpoint: github
       name: florimondmanca/azure-pipelines-templates
-      ref: refs/tags/2.0
+      ref: refs/tags/3.0
 
 trigger:
   - master
@@ -23,5 +23,7 @@ jobs:
 
   - template: job--python-test.yml@templates
     parameters:
-      envs: ["py37", "py38"]
-      uploadCoverageOn: "py38"
+      jobs:
+        py37: null
+        py38:
+          coverage: true
