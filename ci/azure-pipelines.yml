@@ -1,3 +1,11 @@
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      endpoint: github
+      name: florimondmanca/azure-pipelines-templates
+      ref: refs/tags/2.0
+
 trigger:
   - master
 
@@ -9,33 +17,11 @@ variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
 
 jobs:
-  - job: Check
-    steps:
-      - template: templates/install.yml
-        parameters:
-          pythonVersion: "3.8"
+  - template: job--python-check.yml@templates
+    parameters:
+      pythonVersion: "3.8"
 
-  - job: Test
-    strategy:
-      matrix:
-        Python37:
-          pythonVersion: "3.7"
-        Python38:
-          pythonVersion: "3.8"
-          uploadCoverage: true
-
-    steps:
-      - template: templates/install.yml
-        parameters:
-          pythonVersion: $(pythonVersion)
-      - script: scripts/test
-        displayName: "Run tests"
-      - script: |
-          if [ -f .coverage ]; then
-            python -m pip install codecov;
-            codecov --required;
-          fi
-        condition: eq(variables['uploadCoverage'], true)
-        env:
-          CODECOV_TOKEN: $(codecovToken)
-        displayName: "Upload coverage"
+  - template: job--python-test.yml@templates
+    parameters:
+      envs: ["py37", "py38"]
+      uploadCoverageOn: "py38"
