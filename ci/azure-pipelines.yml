@@ -4,7 +4,7 @@ resources:
       type: github
       endpoint: github
       name: florimondmanca/azure-pipelines-templates
-      ref: refs/tags/1.0
+      ref: refs/heads/master
 
 trigger:
   - master
