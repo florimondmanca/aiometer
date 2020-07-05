@@ -3,7 +3,7 @@
 autoflake
 black
 flake8
-isort
+isort==5.*
 mypy
 pytest
 pytest-asyncio
