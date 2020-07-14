@@ -5,7 +5,7 @@ black
 flake8
 isort==5.*
 mypy
-pytest
+pytest==6.*
 pytest-asyncio
 pytest-cov
 seed-isort-config
