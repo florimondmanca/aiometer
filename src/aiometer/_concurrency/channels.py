@@ -22,4 +22,4 @@ class open_memory_channel(Tuple[MemoryReceiveChannel[T], MemorySendChannel[T]]):
 
     # For autocomplete purposes.
     def __init__(self, max_buffer_size: int) -> None:
-        ...
+        ...  # pragma: no cover
