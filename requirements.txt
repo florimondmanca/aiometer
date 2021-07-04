@@ -6,7 +6,6 @@ flake8
 isort==5.*
 mypy
 pytest
-pytest-asyncio
 pytest-cov
 seed-isort-config
 trio
