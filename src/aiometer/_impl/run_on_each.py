@@ -57,4 +57,4 @@ async def run_on_each(
             for state in meter_states:
                 await state.notify_task_started()
 
-            await task_group.spawn(_worker, async_fn, index, value, config)
+            task_group.start_soon(_worker, async_fn, index, value, config)

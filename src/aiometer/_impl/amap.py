@@ -79,7 +79,7 @@ def amap(
                     # Make any `async for ... in results: ...` terminate.
                     await send_channel.aclose()
 
-                await task_group.spawn(sender)
+                task_group.start_soon(sender)
 
                 yield receive_channel
 

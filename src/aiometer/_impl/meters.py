@@ -22,7 +22,7 @@ class Meter:
 class HardLimitMeter(Meter):
     class State(MeterState):
         def __init__(self, max_at_once: int) -> None:
-            self.semaphore = anyio.create_semaphore(max_at_once)
+            self.semaphore = anyio.Semaphore(max_at_once)
 
         async def wait_task_can_start(self) -> None:
             # anyio semaphore interface has no '.acquire()'.
@@ -60,7 +60,7 @@ class RateLimitMeter(Meter):
                 # of the GCRA algorithm.
                 # `next_start_time` represents the TAT (theoretical time of arrival).
                 # See: https://en.wikipedia.org/wiki/Generic_cell_rate_algorithm
-                now = await anyio.current_time()
+                now = anyio.current_time()
                 next_start_time = max(self.next_start_time, now)
                 time_until_start = next_start_time - now
                 threshold = self.period - self.task_delta
@@ -69,7 +69,7 @@ class RateLimitMeter(Meter):
                 await anyio.sleep(max(0, time_until_start - threshold))
 
         async def notify_task_started(self) -> None:
-            now = await anyio.current_time()
+            now = anyio.current_time()
             self.next_start_time = max(self.next_start_time, now) + self.task_delta
 
         async def notify_task_finished(self) -> None:

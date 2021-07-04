@@ -174,7 +174,7 @@ class TestMaxPerSecond:
             self.start_times: List[float] = []
 
         async def task(self, *args: Any) -> None:
-            time = await anyio.current_time()
+            time = float(anyio.current_time())
             self.start_times.append(time)
 
         @property
