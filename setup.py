@@ -32,8 +32,12 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
-    install_requires=["anyio~=3.2", "typing-extensions==3.7.*; python_version<'3.8'"],
-    python_requires=">=3.7",
+    install_requires=[
+        "anyio~=3.2",
+        "typing-extensions==3.7.*; python_version<'3.8'",
+        "contextlib2>=21.6.0; python_version<'3.7'",
+    ],
+    python_requires=">=3.6",
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -43,7 +47,9 @@ setup(
         "Framework :: Trio",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
 )
