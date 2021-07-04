@@ -34,7 +34,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "anyio~=3.2",
-        "typing-extensions==3.7.*; python_version<'3.8'",
+        "typing-extensions~=3.10; python_version<'3.8'",
         "contextlib2>=21.6.0; python_version<'3.7'",
     ],
     python_requires=">=3.6",
