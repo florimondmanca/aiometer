@@ -13,7 +13,6 @@ from typing import (
 
 import anyio
 
-from .._concurrency import open_memory_channel
 from .run_on_each import run_on_each
 from .types import T, U
 
@@ -60,26 +59,26 @@ def amap(
 ) -> AsyncContextManager[AsyncIterable]:
     @asynccontextmanager
     async def _amap() -> AsyncIterator[AsyncIterable]:
-        receive_channel, send_channel = open_memory_channel[Any](
+        send_channel, receive_channel = anyio.create_memory_object_stream(
             max_buffer_size=len(args)
         )
 
-        async with receive_channel, send_channel:
+        with send_channel, receive_channel:
             async with anyio.create_task_group() as task_group:
 
                 async def sender() -> None:
-                    await run_on_each(
-                        async_fn,
-                        args,
-                        max_at_once=max_at_once,
-                        max_per_second=max_per_second,
-                        _include_index=_include_index,
-                        _send_to=send_channel,
-                    )
                     # Make any `async for ... in results: ...` terminate.
-                    await send_channel.aclose()
+                    with send_channel:
+                        await run_on_each(
+                            async_fn,
+                            args,
+                            max_at_once=max_at_once,
+                            max_per_second=max_per_second,
+                            _include_index=_include_index,
+                            _send_to=send_channel,
+                        )
 
-                await task_group.spawn(sender)
+                task_group.start_soon(sender)
 
                 yield receive_channel
 

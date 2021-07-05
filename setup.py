@@ -32,7 +32,7 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
-    install_requires=["anyio==1.*", "typing-extensions==3.7.*; python_version<'3.8'"],
+    install_requires=["anyio~=3.2", "typing-extensions==3.7.*; python_version<'3.8'"],
     python_requires=">=3.7",
     license="MIT",
     classifiers=[

@@ -1,15 +1,15 @@
 from typing import Awaitable, Callable, List, NamedTuple, Optional, Sequence
 
 import anyio
+from anyio.streams.memory import MemoryObjectSendStream
 
-from .._concurrency import MemorySendChannel
 from .meters import HardLimitMeter, Meter, MeterState, RateLimitMeter
 from .types import T
 
 
 class _Config(NamedTuple):
     include_index: bool
-    send_to: Optional[MemorySendChannel]
+    send_to: Optional[MemoryObjectSendStream]
     meter_states: List[MeterState]
 
 
@@ -34,7 +34,7 @@ async def run_on_each(
     max_at_once: int = None,
     max_per_second: float = None,
     _include_index: bool = False,
-    _send_to: MemorySendChannel = None,
+    _send_to: MemoryObjectSendStream = None,
 ) -> None:
     meters: List[Meter] = []
 
@@ -57,4 +57,4 @@ async def run_on_each(
             for state in meter_states:
                 await state.notify_task_started()
 
-            await task_group.spawn(_worker, async_fn, index, value, config)
+            task_group.start_soon(_worker, async_fn, index, value, config)
