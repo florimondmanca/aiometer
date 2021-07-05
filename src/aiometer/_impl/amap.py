@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+import sys
 from typing import (
     Any,
     AsyncContextManager,
@@ -16,10 +16,15 @@ import anyio
 from .run_on_each import run_on_each
 from .types import T, U
 
-try:
-    from typing_extensions import Literal  # Python 3.7.
-except ImportError:  # pragma: no cover
-    from typing import Literal  # type: ignore
+if sys.version_info > (3, 8):  # pragma: no cover
+    from typing import Literal
+else:  # pragma: no cover
+    from typing_extensions import Literal
+
+if sys.version_info > (3, 7):  # pragma: no cover
+    from contextlib import asynccontextmanager
+else:  # pragma: no cover
+    from contextlib2 import asynccontextmanager
 
 
 @overload
