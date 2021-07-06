@@ -1,5 +1,10 @@
 -e .
 
+# Packaging
+twine
+wheel
+
+# Linting and testing
 autoflake
 black==21.6b0
 flake8
