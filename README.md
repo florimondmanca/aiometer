@@ -1,6 +1,6 @@
 # aiometer
 
-[![Build Status](https://dev.azure.com/florimondmanca/public/_apis/build/status/florimondmanca.aiometer?branchName=master)](https://dev.azure.com/florimondmanca/public/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/florimondmanca/public/_apis/build/status/florimondmanca.aiometer?branchName=master)](https://dev.azure.com/florimondmanca/public/_build/latest?definitionId=4&branchName=master)
 [![Coverage](https://codecov.io/gh/florimondmanca/aiometer/branch/master/graph/badge.svg)](https://codecov.io/gh/florimondmanca/aiometer)
 ![Python versions](https://img.shields.io/pypi/pyversions/aiometer.svg)
 [![Package version](https://badge.fury.io/py/aiometer.svg)](https://pypi.org/project/aiometer)
