@@ -1,31 +1,18 @@
 #!/bin/sh -e
 
-export PACKAGE="aiometer"
-export VERSION=`cat src/${PACKAGE}/__version__.py | grep __version__ | sed "s/__version__ = //" | sed "s/'//g"`
-export PREFIX=""
-if [ -d 'venv' ] ; then
-    export PREFIX="venv/bin/"
+VERSION_FILE="src/aiometer/__version__.py"
+PREFIX=""
+if [ -d "venv" ] ; then
+    PREFIX="venv/bin/"
 fi
 
-if ! command -v "${PREFIX}twine" &>/dev/null ; then
-    echo "Unable to find the 'twine' command."
-    echo "Install from PyPI, using '${PREFIX}pip install twine'."
-    exit 1
+if [ ! -z "$CI" ]; then 
+    VERSION=$(grep __version__ ${VERSION_FILE} | grep -o '[0-9][^"]*')
+
+    if [ "refs/tags/${VERSION}" != "${GIT_REF}" ] ; then
+        echo "Git ref '${GIT_REF}' did not match package version '${VERSION}'"
+        exit 1
+    fi
 fi
 
-if ! ${PREFIX}pip show wheel &>/dev/null ; then
-    echo "Unable to find the 'wheel' command."
-    echo "Install from PyPI, using '${PREFIX}pip install wheel'."
-    exit 1
-fi
-
-scripts/clean
-
-${PREFIX}python setup.py sdist bdist_wheel
-${PREFIX}twine upload dist/*
-
-echo "You probably want to also tag the version now:"
-echo "git tag -a ${VERSION} -m 'version ${VERSION}'"
-echo "git push --tags"
-
-scripts/clean
+${PREFIX}twine upload "$@" dist/*

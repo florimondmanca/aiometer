@@ -8,24 +8,36 @@ resources:
 
 trigger:
   - master
+  - refs/tags/*
 
 pr:
   - master
 
 variables:
-  CI: true
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.cache/pip
+  - name: CI
+    value: true
+  - name: PIP_CACHE_DIR
+    value: $(Pipeline.Workspace)/.cache/pip
+  - group: pypi-credentials
 
-jobs:
-  - template: job--python-check.yml@templates
-    parameters:
-      pythonVersion: "3.9"
+stages:
+  - stage: test
+    jobs:
+      - template: job--python-check.yml@templates
+        parameters:
+          pythonVersion: "3.9"
+      - template: job--python-test.yml@templates
+        parameters:
+          jobs:
+            py36: null
+            py37: null
+            py38: null
+            py39:
+              coverage: true
 
-  - template: job--python-test.yml@templates
-    parameters:
-      jobs:
-        py36: null
-        py37: null
-        py38: null
-        py39:
-          coverage: true
+  - stage: publish
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+    jobs:
+      - template: job--python-publish.yml@templates
+        parameters:
+          token: $(pypiToken)
