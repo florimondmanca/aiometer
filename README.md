@@ -119,7 +119,7 @@ Example usage:
 
 ### Running tasks
 
-`aiometer` provides 4 different ways to run tasks concurrently in the form of 4 different run functions. Each function accepts all the options documented in [Flow control](#flow-control), and runs tasks in a slightly different way, allowing to address a variety of use cases. Here's a handy table for reference:
+`aiometer` provides 4 different ways to run tasks concurrently in the form of 4 different run functions. Each function accepts all the options documented in [Flow control](#flow-control), and runs tasks in a slightly different way, allowing to address a variety of use cases. Here's a handy table for reference (see also the [API Reference](#api-reference)):
 
 | Entrypoint      | Use case                                       |
 | --------------- | ---------------------------------------------- |
