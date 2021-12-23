@@ -12,10 +12,13 @@
 - [Example](#example)
 - [Features](#features)
 - [Installation](#installation)
-- [Guide](#guide)
+- [Usage](#usage)
   - [Flow control](#flow-control)
   - [Running tasks](#running-tasks)
-  - [How To](#how-to)
+- [How To](#how-to)
+- [API Reference](#api-reference)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Example
 
@@ -81,7 +84,7 @@ pip install "aiometer==0.3.*"
 - Fully type annotated.
 - 100% test coverage.
 
-## Guide
+## Usage
 
 ### Flow control
 
@@ -196,9 +199,9 @@ As a last fun example, let's use `amap()` to implement a no-threads async versio
 [0.1, 0.2, 0.2, 0.3, 0.5, 0.5, 0.6, 0.7]
 ```
 
-### How To
+## How To
 
-#### Multiple parametrized values in `run_on_each` and `amap`
+### Multiple parametrized values in `run_on_each` and `amap`
 
 `run_on_each` and `amap` only accept functions that accept a single positional argument (i.e. `(Any) -> Awaitable`).
 
@@ -248,6 +251,65 @@ points = [Point(x, y) for x, y in zip(x, y)]
 # Use it:
 async with aiometer.amap(process, points) as results:
     ...
+```
+
+## API Reference
+
+### Common options
+
+* `max_at_once` (_Optional_, `int`): the maximum number of concurrently running tasks at any given time.
+* `max_per_second` (_Optional_, `int`): the maximum number of tasks spawned per second.
+
+### `aiometer.run_on_each()`
+
+**Signature**: _async_ aiometer.run_on_each(*async_fn*, *args*, *, *max_at_once=None*, *max_per_second=None*) -> *None*
+
+Concurrently run the equivalent of `async_fn(arg) for arg in args`. Does not return any value. To get return values back, use [`aiometer.run_all()`](#aiometer-run-all).
+
+### `aiometer.run_all()`
+
+**Signature**: _async_ aiometer.run_all(*async_fns*, *max_at_once=None*, *max_per_second=None*) -> *list*
+
+Concurrently run the `async_fns` functions, and return the list of results in the same order.
+
+### `aiometer.amap()`
+
+**Signature**: _async_ aiometer.amap(*async_fn*, *args*, *max_at_once=None*, *max_per_second=None*) -> *async iterator*
+
+Concurrently run the equivalent of `async_fn(arg) for arg in args`, and return an async iterator that yields results as they become available.
+
+#### `aiometer.run_any()`
+
+**Signature**: _async_ aiometer.run_any(*async_fns*, *max_at_once=None*, *max_per_second=None*) -> *Any*
+
+Concurrently run the `async_fns` functions, and return the first available result.
+
+## Contributing
+
+This project is managed through shell scripts, stored under `scripts/`.
+
+To set things up, run:
+
+```bash
+scripts/install
+```
+
+Then, you should be able to run tests:
+
+```bash
+scripts/test
+```
+
+And code checks:
+
+```bash
+scripts/check
+```
+
+To run auto code formatting:
+
+```bash
+scripts/lint
 ```
 
 ## License
