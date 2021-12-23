@@ -264,7 +264,7 @@ async with aiometer.amap(process, points) as results:
 
 **Signature**: _async_ aiometer.run_on_each(*async_fn*, *args*, *, *max_at_once=None*, *max_per_second=None*) -> *None*
 
-Concurrently run the equivalent of `async_fn(arg) for arg in args`. Does not return any value. To get return values back, use [`aiometer.run_all()`](#aiometer-run-all).
+Concurrently run the equivalent of `async_fn(arg) for arg in args`. Does not return any value. To get return values back, use [`aiometer.run_all()`](#aiometerrun_all).
 
 ### `aiometer.run_all()`
 
@@ -278,7 +278,7 @@ Concurrently run the `async_fns` functions, and return the list of results in th
 
 Concurrently run the equivalent of `async_fn(arg) for arg in args`, and return an async iterator that yields results as they become available.
 
-#### `aiometer.run_any()`
+### `aiometer.run_any()`
 
 **Signature**: _async_ aiometer.run_any(*async_fns*, *max_at_once=None*, *max_per_second=None*) -> *Any*
 
