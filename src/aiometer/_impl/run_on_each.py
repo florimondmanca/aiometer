@@ -31,10 +31,10 @@ async def run_on_each(
     async_fn: Callable[[T], Awaitable],
     args: Sequence[T],
     *,
-    max_at_once: int = None,
-    max_per_second: float = None,
+    max_at_once: Optional[int] = None,
+    max_per_second: Optional[float] = None,
     _include_index: bool = False,
-    _send_to: MemoryObjectSendStream = None,
+    _send_to: Optional[MemoryObjectSendStream] = None,
 ) -> None:
     meters: List[Meter] = []
 

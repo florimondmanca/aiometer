@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, Sequence
+from typing import Awaitable, Callable, Sequence, Optional
 
 from .amap import amap
 from .types import T
@@ -8,8 +8,8 @@ from .utils import check_no_lambdas
 async def run_any(
     async_fns: Sequence[Callable[[], Awaitable[T]]],
     *,
-    max_at_once: int = None,
-    max_per_second: float = None,
+    max_at_once: Optional[int] = None,
+    max_per_second: Optional[float] = None,
 ) -> T:
     check_no_lambdas(async_fns, entrypoint="aiometer.run_any")
 
