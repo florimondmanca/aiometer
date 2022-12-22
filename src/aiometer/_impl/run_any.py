@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, Sequence, Optional
+from typing import Awaitable, Callable, Optional, Sequence
 
 from .amap import amap
 from .types import T

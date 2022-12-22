@@ -6,10 +6,10 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
+    Optional,
     Sequence,
     Tuple,
     overload,
-    Optional
 )
 
 import anyio
