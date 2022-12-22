@@ -10,7 +10,7 @@ black==21.6b0
 flake8
 isort==5.*
 mypy
-pytest
+pytest==6.2.5
 pytest-cov
 seed-isort-config
-trio
+trio>=0.16,<0.22
