@@ -6,10 +6,10 @@ wheel
 
 # Tooling and tests.
 autoflake
-black==22.10.*
-flake8==5.*
+black==22.12.*
+flake8==6.*
 isort==5.*
-mypy==0.990
+mypy==0.991
 pytest==7.*
 pytest-cov
 trio==0.*
