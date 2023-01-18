@@ -286,31 +286,7 @@ Concurrently run the `async_fns` functions, and return the first available resul
 
 ## Contributing
 
-This project is managed through shell scripts, stored under `scripts/`.
-
-To set things up, run:
-
-```bash
-scripts/install
-```
-
-Then, you should be able to run tests:
-
-```bash
-scripts/test
-```
-
-And code checks:
-
-```bash
-scripts/check
-```
-
-To run auto code formatting:
-
-```bash
-scripts/lint
-```
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 
