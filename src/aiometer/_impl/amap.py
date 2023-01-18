@@ -1,4 +1,5 @@
 import sys
+from contextlib import asynccontextmanager
 from typing import (
     Any,
     AsyncContextManager,
@@ -21,11 +22,6 @@ if sys.version_info > (3, 8):  # pragma: no cover
     from typing import Literal
 else:  # pragma: no cover
     from typing_extensions import Literal
-
-if sys.version_info > (3, 7):  # pragma: no cover
-    from contextlib import asynccontextmanager
-else:  # pragma: no cover
-    from contextlib2 import asynccontextmanager
 
 
 @overload
