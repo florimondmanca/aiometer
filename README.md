@@ -5,7 +5,7 @@
 ![Python versions](https://img.shields.io/pypi/pyversions/aiometer.svg)
 [![Package version](https://badge.fury.io/py/aiometer.svg)](https://pypi.org/project/aiometer)
 
-`aiometer` is a Python 3.6+ concurrency scheduling library compatible with `asyncio` and `trio` and inspired by [Trimeter](https://github.com/python-trio/trimeter). It makes it easier to execute lots of tasks concurrently while controlling concurrency limits (i.e. applying _[backpressure](https://lucumr.pocoo.org/2020/1/1/async-pressure/)_) and collecting results in a predictable manner.
+`aiometer` is a Python 3.7+ concurrency scheduling library compatible with `asyncio` and `trio` and inspired by [Trimeter](https://github.com/python-trio/trimeter). It makes it easier to execute lots of tasks concurrently while controlling concurrency limits (i.e. applying _[backpressure](https://lucumr.pocoo.org/2020/1/1/async-pressure/)_) and collecting results in a predictable manner.
 
 **Content**
 
@@ -286,31 +286,7 @@ Concurrently run the `async_fns` functions, and return the first available resul
 
 ## Contributing
 
-This project is managed through shell scripts, stored under `scripts/`.
-
-To set things up, run:
-
-```bash
-scripts/install
-```
-
-Then, you should be able to run tests:
-
-```bash
-scripts/test
-```
-
-And code checks:
-
-```bash
-scripts/check
-```
-
-To run auto code formatting:
-
-```bash
-scripts/lint
-```
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 

@@ -1,4 +1,5 @@
 import sys
+from contextlib import asynccontextmanager
 from typing import (
     Any,
     AsyncContextManager,
@@ -6,6 +7,7 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
+    Optional,
     Sequence,
     Tuple,
     overload,
@@ -21,19 +23,14 @@ if sys.version_info > (3, 8):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Literal
 
-if sys.version_info > (3, 7):  # pragma: no cover
-    from contextlib import asynccontextmanager
-else:  # pragma: no cover
-    from contextlib2 import asynccontextmanager
-
 
 @overload
 def amap(
     async_fn: Callable[[T], Awaitable[U]],
     args: Sequence[T],
     *,
-    max_at_once: int = None,
-    max_per_second: float = None,
+    max_at_once: Optional[int] = None,
+    max_per_second: Optional[float] = None,
     _include_index: Literal[False] = False,
 ) -> AsyncContextManager[AsyncIterable[U]]:
     ...  # pragma: no cover
@@ -44,8 +41,8 @@ def amap(
     async_fn: Callable[[T], Awaitable[U]],
     args: Sequence[T],
     *,
-    max_at_once: int = None,
-    max_per_second: float = None,
+    max_at_once: Optional[int] = None,
+    max_per_second: Optional[float] = None,
     _include_index: Literal[True],
 ) -> AsyncContextManager[AsyncIterable[Tuple[int, U]]]:
     ...  # pragma: no cover
@@ -58,8 +55,8 @@ def amap(
     async_fn: Callable[[Any], Awaitable],
     args: Sequence,
     *,
-    max_at_once: int = None,
-    max_per_second: float = None,
+    max_at_once: Optional[int] = None,
+    max_per_second: Optional[float] = None,
     _include_index: bool = False,
 ) -> AsyncContextManager[AsyncIterable]:
     @asynccontextmanager
