@@ -1,16 +1,15 @@
 -e .
 
-# Packaging
+# Packaging.
 twine
 wheel
 
-# Linting and testing
+# Tooling and tests.
 autoflake
-black==21.6b0
-flake8
+black==22.10.*
+flake8==5.*
 isort==5.*
-mypy
-pytest
+mypy==0.990
+pytest==7.*
 pytest-cov
-seed-isort-config
-trio
+trio==0.*
