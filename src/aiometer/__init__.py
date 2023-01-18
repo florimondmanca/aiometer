@@ -1,6 +1,6 @@
 from ._impl import amap, run_all, run_any, run_on_each
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "__version__",
