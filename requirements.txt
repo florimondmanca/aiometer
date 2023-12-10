@@ -1,5 +1,8 @@
 -e .
 
+# Compatibility testing.
+anyio~=3.2; python_version<'3.11'
+
 # Packaging.
 twine
 wheel

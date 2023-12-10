@@ -30,7 +30,9 @@ stages:
       - template: job--python-test.yml@templates
         parameters:
           jobs:
-            py37: null
+            py37:
+              variables:
+                PYTEST_ADDOPTS: "--cov-config=.coveragerc_py37"
             py311:
               coverage: true
 
