@@ -14,7 +14,9 @@ from typing import (
 )
 
 import anyio
+from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
 
+from .._compat import collapse_excgroups
 from .run_on_each import run_on_each
 from .types import T, U
 
@@ -61,27 +63,30 @@ def amap(
 ) -> AsyncContextManager[AsyncIterable]:
     @asynccontextmanager
     async def _amap() -> AsyncIterator[AsyncIterable]:
-        send_channel, receive_channel = anyio.create_memory_object_stream(
-            max_buffer_size=len(args)
-        )
+        channels: Tuple[
+            MemoryObjectSendStream, MemoryObjectReceiveStream
+        ] = anyio.create_memory_object_stream(max_buffer_size=len(args))
+
+        send_channel, receive_channel = channels
 
         with send_channel, receive_channel:
-            async with anyio.create_task_group() as task_group:
+            with collapse_excgroups():
+                async with anyio.create_task_group() as task_group:
 
-                async def sender() -> None:
-                    # Make any `async for ... in results: ...` terminate.
-                    with send_channel:
-                        await run_on_each(
-                            async_fn,
-                            args,
-                            max_at_once=max_at_once,
-                            max_per_second=max_per_second,
-                            _include_index=_include_index,
-                            _send_to=send_channel,
-                        )
+                    async def sender() -> None:
+                        # Make any `async for ... in results: ...` terminate.
+                        with send_channel:
+                            await run_on_each(
+                                async_fn,
+                                args,
+                                max_at_once=max_at_once,
+                                max_per_second=max_per_second,
+                                _include_index=_include_index,
+                                _send_to=send_channel,
+                            )
 
-                task_group.start_soon(sender)
+                    task_group.start_soon(sender)
 
-                yield receive_channel
+                    yield receive_channel
 
     return _amap()
