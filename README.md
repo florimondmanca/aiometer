@@ -74,7 +74,7 @@ _Try this code interactively using [IPython](https://ipython.org/install.html)._
 _This project is in beta and maturing. Be sure to pin any dependencies to the latest minor._
 
 ```bash
-pip install "aiometer==0.4.*"
+pip install "aiometer==0.5.*"
 ```
 
 ## Features
