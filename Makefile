@@ -5,7 +5,7 @@ build:
 	${bin}python -m build
 
 check:
-	${bin}black --check --diff --target-version=py37 ${pysources}
+	${bin}black --check --diff --target-version=py38 ${pysources}
 	${bin}flake8 ${pysources}
 	${bin}mypy ${pysources}
 	${bin}isort --check --diff ${pysources}
@@ -23,7 +23,7 @@ install-python: venv
 format:
 	${bin}autoflake --in-place --recursive ${pysources}
 	${bin}isort ${pysources}
-	${bin}black --target-version=py37 ${pysources}
+	${bin}black --target-version=py38 ${pysources}
 
 publish:
 	${bin}twine upload dist/*

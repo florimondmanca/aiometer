@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 0.5.0 - Unreleased
+
+### Removed
+
+- Drop support for Python 3.7, as it has reached EOL. (Pull #44)
+
+### Added
+
+- Add official support for Python 3.12. (Pull #44)
+- Add support for anyio 4. This allows catching exception groups using the native ExceptionGroup. On anyio 3.2+, anyio would throw its own ExceptionGroup type. Compatibility with anyio 3.2+ is retained. (Pull #43)
+
 ## 0.4.0 - 2023-01-18
 
 ### Removed

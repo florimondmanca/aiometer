@@ -1,4 +1,3 @@
-import sys
 from contextlib import asynccontextmanager
 from typing import (
     Any,
@@ -7,6 +6,7 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
+    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -19,11 +19,6 @@ from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStre
 from .._compat import collapse_excgroups
 from .run_on_each import run_on_each
 from .types import T, U
-
-if sys.version_info > (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 
 @overload

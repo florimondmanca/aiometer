@@ -1,4 +1,4 @@
 [report]
 exclude_lines =
     pragma: no cover
-    pragma: nopy37
+    pragma: nopy38

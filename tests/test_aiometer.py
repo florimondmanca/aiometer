@@ -72,7 +72,7 @@ class TestRunners:
         with pytest.raises(Failure):
             async with aiometer.amap(process, items) as results:
                 async for result in results:
-                    pass  # pragma: no cover  # Python 3.7 fix.
+                    pass  # pragma: nopy38
 
     async def test_run_any(self) -> None:
         async def process_fast() -> str:
@@ -147,7 +147,7 @@ class TestMaxAtOnce:
                 spy.async_fn, spy.args, max_at_once=max_at_once
             ) as results:
                 async for _ in results:
-                    pass  # pragma: no cover  # Python 3.7 fix.
+                    pass  # pragma: nopy38
 
     @pytest.mark.slow
     @pytest.mark.parametrize("max_at_once", max_at_once_params)
@@ -212,7 +212,7 @@ class TestMaxPerSecond:
                 spy.task, spy.args, max_per_second=max_per_second
             ) as results:
                 async for _ in results:
-                    pass  # pragma: no cover  # Python 3.7 fix.
+                    pass  # pragma: nopy38
 
     @pytest.mark.slow
     @pytest.mark.parametrize("max_per_second", max_per_second_params)
