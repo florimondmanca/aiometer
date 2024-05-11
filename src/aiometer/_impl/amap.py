@@ -58,20 +58,11 @@ def amap(
     max_per_second: Optional[float] = None,
     _include_index: bool = False,
 ) -> AsyncContextManager[AsyncIterable]:
-    
-    if not is_async_iter(args):
-        args = as_async_iter(args)
-
     @asynccontextmanager
     async def _amap() -> AsyncIterator[AsyncIterable]:
-        try:
-            channels: Tuple[
-                MemoryObjectSendStream, MemoryObjectReceiveStream
-            ] = anyio.create_memory_object_stream(max_buffer_size=len(args))
-        except TypeError:
-            channels: Tuple[
-                MemoryObjectSendStream, MemoryObjectReceiveStream
-            ] = anyio.create_memory_object_stream(max_buffer_size=math.inf)
+        channels: Tuple[
+            MemoryObjectSendStream, MemoryObjectReceiveStream
+        ] = anyio.create_memory_object_stream(max_buffer_size=math.inf)
 
         send_channel, receive_channel = channels
 
