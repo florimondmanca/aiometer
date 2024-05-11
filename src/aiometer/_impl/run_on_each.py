@@ -1,4 +1,13 @@
-from typing import Awaitable, Callable, List, NamedTuple, Optional, Sequence, Union, AsyncIterable
+from typing import (
+    Awaitable,
+    Callable,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Union,
+    AsyncIterable,
+)
 
 import anyio
 from anyio.streams.memory import MemoryObjectSendStream

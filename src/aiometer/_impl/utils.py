@@ -66,8 +66,10 @@ def check_no_lambdas(funcs: Sequence[Callable], entrypoint: str) -> None:
 
     raise ValueError(message)
 
+
 def is_async_iter(iter) -> bool:
-    return hasattr(iter, '__aiter__')
+    return hasattr(iter, "__aiter__")
+
 
 async def as_async_iter(iter):
     for item in iter:

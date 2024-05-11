@@ -23,6 +23,7 @@ from .run_on_each import run_on_each
 from .types import T, U
 from .utils import as_async_iter, is_async_iter
 
+
 @overload
 def amap(
     async_fn: Callable[[T], Awaitable[U]],
@@ -52,7 +53,7 @@ def amap(
 # checkers on the client side.)
 def amap(
     async_fn: Callable[[Any], Awaitable],
-    args: Union[Sequence,AsyncIterable],
+    args: Union[Sequence, AsyncIterable],
     *,
     max_at_once: Optional[int] = None,
     max_per_second: Optional[float] = None,
