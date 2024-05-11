@@ -1,3 +1,4 @@
+import math
 from contextlib import asynccontextmanager
 from typing import (
     Any,
@@ -10,6 +11,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Union,
     overload,
 )
 
@@ -19,6 +21,7 @@ from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStre
 from .._compat import collapse_excgroups
 from .run_on_each import run_on_each
 from .types import T, U
+from .utils import as_async_iter, is_async_iter
 
 
 @overload
@@ -50,7 +53,7 @@ def amap(
 # checkers on the client side.)
 def amap(
     async_fn: Callable[[Any], Awaitable],
-    args: Sequence,
+    args: Union[Sequence, AsyncIterable],
     *,
     max_at_once: Optional[int] = None,
     max_per_second: Optional[float] = None,
@@ -60,7 +63,7 @@ def amap(
     async def _amap() -> AsyncIterator[AsyncIterable]:
         channels: Tuple[
             MemoryObjectSendStream, MemoryObjectReceiveStream
-        ] = anyio.create_memory_object_stream(max_buffer_size=len(args))
+        ] = anyio.create_memory_object_stream(max_buffer_size=math.inf)
 
         send_channel, receive_channel = channels
 
