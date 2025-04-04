@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.0.0 - 2025-04-04
+
+_This release contains no code changes._
+
+### Changed
+
+- Package is now marked as Production/Stable. (Pull #49)
+
+### Added
+
+- Test on Python 3.13. (Pull #49)
+
 ## 0.5.0 - 2023-12-11
 
 ### Removed
