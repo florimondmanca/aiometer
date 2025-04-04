@@ -11,7 +11,7 @@ authors = [
   { name = "Florimond Manca", email = "florimond.manca@protonmail.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Framework :: AsyncIO",
   "Framework :: Trio",
@@ -22,6 +22,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
   "anyio>=3.2,<5",
