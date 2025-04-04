@@ -71,10 +71,10 @@ _Try this code interactively using [IPython](https://ipython.org/install.html)._
 
 ## Installation
 
-_Be sure to pin any dependencies to the latest minor version._
+_Be sure to pin any dependencies to the latest major version._
 
 ```bash
-pip install "aiometer==0.5.*"
+pip install "aiometer==1.*"
 ```
 
 ## Features
