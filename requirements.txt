@@ -1,7 +1,7 @@
 -e .
 
 # Compatibility testing.
-anyio~=3.2; python_version<'3.11'
+anyio~=4.0; python_version<'3.11'
 
 # Packaging.
 twine
