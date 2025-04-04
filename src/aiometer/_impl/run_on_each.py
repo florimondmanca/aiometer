@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, List, NamedTuple, Optional, Sequence
+from typing import Awaitable, Callable, List, NamedTuple, Optional, Sequence, cast
 
 import anyio
 from anyio.streams.memory import MemoryObjectSendStream
@@ -57,4 +57,6 @@ async def run_on_each(
             for state in meter_states:
                 await state.notify_task_started()
 
-            task_group.start_soon(_worker, async_fn, index, value, config)
+            task_group.start_soon(
+                cast(Callable, _worker), async_fn, index, value, config
+            )

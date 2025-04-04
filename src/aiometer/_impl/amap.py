@@ -10,6 +10,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    cast,
     overload,
 )
 
@@ -80,7 +81,7 @@ def amap(
                                 _send_to=send_channel,
                             )
 
-                    task_group.start_soon(sender)
+                    task_group.start_soon(cast(Callable, sender))
 
                     yield receive_channel
 
